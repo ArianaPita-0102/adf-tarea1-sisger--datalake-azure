@@ -18,7 +18,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ventas_sc_limpia_csv",
+						"referenceName": "venta_sc_limpia_csv",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -158,7 +158,7 @@
 				"select1 derive(canal = 'Sucursal') ~> derivedColumn6",
 				"derivedColumn6 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     partitionFileNames:['ventas_sz_limpio.csv'],",
+				"     partitionFileNames:['ventas_sc_limpio.csv'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
