@@ -1,0 +1,203 @@
+{
+	"name": "df_ventas_online_bronze_silver",
+	"properties": {
+		"folder": {
+			"name": "Bronze"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ventas_online_csv",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "venta_sc_limpia_csv",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "derivedColumn5"
+				},
+				{
+					"name": "filter1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          order_id as string,",
+				"          timestamp as string,",
+				"          product as string,",
+				"          qty as string,",
+				"          unit_price as string,",
+				"          {customer/name} as string,",
+				"          {customer/email} as string,",
+				"          {customer/city} as string,",
+				"          payment_method as string,",
+				"          status as string,",
+				"          shipping_cost as string,",
+				"          channel as string,",
+				"          customer as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 select(mapColumn(",
+				"          id_venta = order_id,",
+				"          fecha = timestamp,",
+				"          producto = product,",
+				"          cantidad = qty,",
+				"          precio_unitario = unit_price,",
+				"          nombre_cliente = {customer/name},",
+				"          cliente_email = {customer/email},",
+				"          sucursal = {customer/city},",
+				"          metodo_pago = payment_method,",
+				"          estado = status,",
+				"          costo_envio = shipping_cost,",
+				"          canal = channel",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(id_venta = trim(id_venta),",
+				"          fecha = trim(fecha),",
+				"          producto = trim(producto),",
+				"          cantidad = trim(cantidad),",
+				"          precio_unitario = trim(precio_unitario),",
+				"          nombre_cliente = trim(nombre_cliente),",
+				"          cliente_email = trim(cliente_email),",
+				"          sucursal = trim(sucursal),",
+				"          metodo_pago = trim(metodo_pago),",
+				"          estado = trim(estado),",
+				"          costo_envio = trim(costo_envio),",
+				"          canal = trim(canal)) ~> derivedColumn1",
+				"derivedColumn1 derive(sucursal = iif(\r",
+				"    lower(trim(sucursal)) == 'lpz' || lower(trim(sucursal)) == 'la paz' || lower(trim(sucursal)) == 'lapaz' || lower(trim(sucursal)) == 'lp' || lower(trim(sucursal)) == 'l.p.',\r",
+				"    'La Paz',\r",
+				"iif(\r",
+				"    lower(trim(sucursal)) == 'scz' || lower(trim(sucursal)) == 'santa cruz' || lower(trim(sucursal)) == 'santacruz',\r",
+				"    'Santa Cruz',\r",
+				"iif(\r",
+				"    lower(trim(sucursal)) == 'cbba' || lower(trim(sucursal)) == 'cochabamba' || lower(trim(sucursal)) == 'cocha',\r",
+				"    'Cochabamba',\r",
+				"iif(\r",
+				"    lower(trim(sucursal)) == 'oruro',\r",
+				"    'Oruro',\r",
+				"iif(\r",
+				"    lower(trim(sucursal)) == 'potosi',\r",
+				"    'Potosí',\r",
+				"iif(\r",
+				"    lower(trim(sucursal)) == 'tarija',\r",
+				"    'Tarija',\r",
+				"iif(\r",
+				"    lower(trim(sucursal)) == 'trinidad' || lower(trim(sucursal)) == 'beni',\r",
+				"    'Trinidad',\r",
+				"iif(\r",
+				"    lower(trim(sucursal)) == 'sucre' || lower(trim(sucursal)) == 'chuquisaca',\r",
+				"    'Sucre',\r",
+				"iif(\r",
+				"    lower(trim(sucursal)) == 'cobija' || lower(trim(sucursal)) == 'pando',\r",
+				"    'Cobija',\r",
+				"    upper(substring(trim(sucursal),1,1)) + lower(substring(trim(sucursal),2))\r",
+				"))))))))),",
+				"          canal = 'Online') ~> derivedColumn2",
+				"derivedColumn2 derive(fecha = coalesce(\r",
+				"    toDate(fecha, 'yyyy-MM-dd'),\r",
+				"    toDate(fecha, 'dd-MM-yyyy'),\r",
+				"    toDate(fecha, 'MM-dd-yyyy'),\r",
+				"    toDate(fecha, 'dd/MM/yyyy'),\r",
+				"    toDate(fecha, 'yyyy/MM/dd'),\r",
+				"    toDate(fecha, 'dd/MMM/yyyy'),\r",
+				"    toDate(fecha, 'dd-MMM-yyyy'),\r",
+				"\r",
+				"    toDate(\r",
+				"        replace(replace(fecha, '\"', ''), ',', ''),\r",
+				"        'MMMM dd yyyy'\r",
+				"    ),\r",
+				"\r",
+				"    toDate(\r",
+				"        replace(\r",
+				"            replace(\r",
+				"                replace(\r",
+				"                    replace(\r",
+				"                        replace(\r",
+				"                            replace(\r",
+				"                                replace(\r",
+				"                                    replace(\r",
+				"                                        replace(\r",
+				"                                            replace(\r",
+				"                                                replace(\r",
+				"                                                    replace(\r",
+				"                                                        replace(\r",
+				"                                                            replace(\r",
+				"                                                                lower(fecha),\r",
+				"                                                                '\"',''\r",
+				"                                                            ),\r",
+				"                                                            ' de ',' '\r",
+				"                                                        ),\r",
+				"                                                        'enero','january'\r",
+				"                                                    ),\r",
+				"                                                    'febrero','february'\r",
+				"                                                ),\r",
+				"                                                'marzo','march'\r",
+				"                                            ),\r",
+				"                                            'abril','april'\r",
+				"                                        ),\r",
+				"                                        'mayo','may'\r",
+				"                                    ),\r",
+				"                                    'junio','june'\r",
+				"                                ),\r",
+				"                                'julio','july'\r",
+				"                            ),\r",
+				"                            'agosto','august'\r",
+				"                        ),\r",
+				"                        'septiembre','september'\r",
+				"                    ),\r",
+				"                    'setiembre','september'\r",
+				"                ),\r",
+				"                'octubre','october'\r",
+				"            ),\r",
+				"            'noviembre','november'\r",
+				"        )\r",
+				"    , 'dd MMMM yyyy')\r",
+				")) ~> derivedColumn3",
+				"derivedColumn3 derive(precio_unitario = toFloat(regexReplace(toString(precio_unitario),'[^0-9.]','')),",
+				"          cantidad = abs(toInteger(cantidad))) ~> derivedColumn4",
+				"derivedColumn4 derive(producto = initCap(regexReplace(regexReplace(producto, '\"+', ''), '\\\\s+', ' '))) ~> derivedColumn5",
+				"derivedColumn5 filter(cantidad>0 && !isNull(precio_unitario) && !isNull(fecha)) ~> filter1",
+				"filter1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['ventas_online_limpio.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}
