@@ -18,7 +18,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "venta_lpz_limpia_csv",
+						"referenceName": "venta_sc_limpia_csv",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -155,20 +155,7 @@
 				"derivedColumn5 filter(cantidad>0 && !isNull(precio_unitario) && !isNull(fecha)) ~> filter1",
 				"filter1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          id_venta as string,",
-				"          fecha as string,",
-				"          producto as string,",
-				"          cantidad as string,",
-				"          precio_unitario as string,",
-				"          sucursal as string,",
-				"          vendedor as string,",
-				"          cliente_nombre as string,",
-				"          cliente_email as string,",
-				"          metodo_pago as string,",
-				"          canal as string",
-				"     ),",
-				"     partitionFileNames:['ventas_lpz_limpio_csv'],",
+				"     partitionFileNames:['ventas_lpz_limpio.csv'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
